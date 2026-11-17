@@ -1,0 +1,101 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - SmartWarranty</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+</head>
+<body class="bg-light">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm">
+        <div class="container">
+            <a class="navbar-brand fw-bold" asp-controller="Home" asp-action="Index">SmartWarranty</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="mainNav">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="About">About</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Features">Features</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="HowItWorks">How It Works</a></li>
+                    <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Contact">Contact</a></li>
+                </ul>
+                <ul class="navbar-nav ms-auto">
+                    @if (User.Identity != null && User.Identity.IsAuthenticated)
+                    {
+                        if (User.IsInRole("Admin"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">Admin</a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Dashboard">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Customers">Customers</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Brands">Brands</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Categories">Categories</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Products">Products</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Warranties">Warranties</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="ServiceRequests">Service Requests</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Support">Manufacturer Support</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Admin" asp-action="Reports">Reports</a></li>
+                                </ul>
+                            </li>
+                        }
+                        else if (User.IsInRole("Customer"))
+                        {
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">My Account</a>
+                                <ul class="dropdown-menu dropdown-menu-end">
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Dashboard">Dashboard</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Products">My Products</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Warranties">Warranties</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Documents">Documents</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Eligibility">Warranty Eligibility</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="ManufacturerSupport">Manufacturer Support</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="ServiceRequests">Service Requests</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="ServiceHistory">Service History</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Notifications">Notifications</a></li>
+                                    <li><a class="dropdown-item" asp-controller="Customer" asp-action="Profile">Profile</a></li>
+                                </ul>
+                            </li>
+                        }
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="Logout">Logout</a></li>
+                    }
+                    else
+                    {
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="CustomerLogin">Customer Login</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="CustomerRegister">Register</a></li>
+                        <li class="nav-item"><a class="nav-link" asp-controller="Account" asp-action="AdminLogin">Admin Login</a></li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="container py-4">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+            }
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="border-top bg-white mt-5">
+        <div class="container py-4 text-center text-muted">
+            &copy; 2026 SmartWarranty - Digital Warranty & Product Lifecycle Management
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+

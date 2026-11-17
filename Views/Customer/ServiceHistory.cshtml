@@ -1,0 +1,6 @@
+@model IEnumerable<SmartWarranty_2.Models.ServiceRequest>
+@{
+    ViewData["Title"] = "Service History";
+}
+<h2>Service History</h2>
+<table class="table table-striped"><thead><tr><th>Request</th><th>Product</th><th>Status</th><th>Issue</th><th>Claim Reference</th></tr></thead><tbody>@foreach(var req in Model){<tr><td>@req.ServiceRequestCode</td><td>@req.Product.Name</td><td>@req.Status</td><td>@req.IssueDescription</td><td>@req.ClaimReferenceNumber</td></tr>}</tbody></table>

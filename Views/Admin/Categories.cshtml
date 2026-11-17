@@ -1,0 +1,14 @@
+@model IEnumerable<SmartWarranty_2.Models.ProductCategory>
+@{
+    ViewData["Title"] = "Categories";
+}
+<h2>Product Categories</h2>
+<form asp-action="CreateCategory" method="post" class="mb-4">
+    @Html.AntiForgeryToken()
+    <div class="row g-2">
+        <div class="col-md-6"><input name="Name" class="form-control" placeholder="Category name" required /></div>
+        <div class="col-md-6"><input name="Description" class="form-control" placeholder="Description" /></div>
+    </div>
+    <button class="btn btn-primary mt-2" type="submit">Add Category</button>
+</form>
+<table class="table table-striped"><thead><tr><th>Name</th><th>Description</th></tr></thead><tbody>@foreach(var c in Model){<tr><td>@c.Name</td><td>@c.Description</td></tr>}</tbody></table>

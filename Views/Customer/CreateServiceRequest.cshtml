@@ -1,0 +1,39 @@
+@model SmartWarranty_2.ViewModels.ServiceRequestViewModel
+@{
+    ViewData["Title"] = "Create Service Request";
+    var products = ViewBag.Products as IEnumerable<SmartWarranty_2.Models.Product> ?? Enumerable.Empty<SmartWarranty_2.Models.Product>();
+}
+<h2>Submit Service Request</h2>
+<form asp-action="CreateServiceRequest" method="post">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="row g-3">
+        <div class="col-md-6">
+            <label asp-for="ProductId" class="form-label"></label>
+            <select asp-for="ProductId" class="form-select">
+                <option value="">Select product</option>
+                @foreach(var p in products){<option value="@p.Id">@p.Name - @p.Brand.Name</option>}
+            </select>
+            <span asp-validation-for="ProductId" class="text-danger"></span>
+        </div>
+        <div class="col-md-12">
+            <label asp-for="IssueDescription" class="form-label"></label>
+            <textarea asp-for="IssueDescription" class="form-control" rows="4"></textarea>
+            <span asp-validation-for="IssueDescription" class="text-danger"></span>
+        </div>
+        <div class="col-md-12">
+            <label asp-for="AdditionalInformation" class="form-label"></label>
+            <textarea asp-for="AdditionalInformation" class="form-control" rows="3"></textarea>
+        </div>
+        <div class="col-md-12">
+            <label asp-for="ClaimReferenceNumber" class="form-label"></label>
+            <input asp-for="ClaimReferenceNumber" class="form-control" />
+            <span asp-validation-for="ClaimReferenceNumber" class="text-danger"></span>
+        </div>
+    </div>
+    <button class="btn btn-primary mt-3" type="submit">Submit Request</button>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

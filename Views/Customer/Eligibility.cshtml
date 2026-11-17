@@ -1,0 +1,7 @@
+@model IEnumerable<SmartWarranty_2.Models.Product>
+@{
+    ViewData["Title"] = "Warranty Eligibility";
+}
+<h2>Warranty Eligibility</h2>
+<div class="alert alert-info">This check is for reference only. Final warranty approval is handled by the relevant manufacturer.</div>
+<table class="table table-striped"><thead><tr><th>Product</th><th>Brand</th><th>Warranty Start</th><th>Warranty Expiry</th><th>Status</th><th>Eligibility</th></tr></thead><tbody>@foreach(var product in Model){ var warranty = product.Warranties.FirstOrDefault(); if(warranty != null){ var active = SmartWarranty_2.Services.WarrantyStatusService.IsEligible(warranty); var status = SmartWarranty_2.Services.WarrantyStatusService.GetStatus(warranty); <tr><td>@product.Name</td><td>@product.Brand.Name</td><td>@warranty.StartDate.ToShortDateString()</td><td>@warranty.ExpiryDate.ToShortDateString()</td><td>@status</td><td>@(active ? "Active" : "Expired")</td></tr>}} </tbody></table>

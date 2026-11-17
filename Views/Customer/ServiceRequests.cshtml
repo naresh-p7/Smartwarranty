@@ -1,0 +1,16 @@
+@model IEnumerable<SmartWarranty_2.Models.ServiceRequest>
+@{
+    ViewData["Title"] = "Service Requests";
+}
+<h2>Service Requests</h2>
+<a class="btn btn-primary mb-3" asp-action="CreateServiceRequest">Create Service Request</a>
+<table class="table table-striped"><thead><tr><th>ID</th><th>Product</th><th>Issue</th><th>Status</th><th>Claim Reference</th></tr></thead><tbody>@foreach(var req in Model){<tr><td>@req.ServiceRequestCode</td><td>@req.Product.Name</td><td>@req.IssueDescription</td><td>@req.Status</td><td>
+<form asp-action="UpdateClaimReference" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@req.Id" />
+    <div class="input-group input-group-sm">
+        <input name="claimReferenceNumber" value="@req.ClaimReferenceNumber" class="form-control" />
+        <button class="btn btn-outline-primary" type="submit">Save</button>
+    </div>
+</form>
+</td></tr>}</tbody></table>

@@ -1,0 +1,16 @@
+@model SmartWarranty_2.Models.Customer
+@{
+    ViewData["Title"] = "Profile";
+}
+<h2>My Profile</h2>
+<form asp-action="UpdateProfile" method="post">
+    @Html.AntiForgeryToken()
+    <div class="row g-3">
+        <div class="col-md-6"><label class="form-label">First Name</label><input name="FirstName" value="@Model.FirstName" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Last Name</label><input name="LastName" value="@Model.LastName" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Email</label><input name="Email" value="@Model.Email" class="form-control" /></div>
+        <div class="col-md-6"><label class="form-label">Phone</label><input name="PhoneNumber" value="@Model.PhoneNumber" class="form-control" /></div>
+        <div class="col-12"><label class="form-label">Address</label><textarea name="Address" class="form-control">@Model.Address</textarea></div>
+    </div>
+    <button class="btn btn-primary mt-3" type="submit">Save Changes</button>
+</form>

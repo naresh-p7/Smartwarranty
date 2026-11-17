@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Upload Document";
+    var product = ViewBag.Product as SmartWarranty_2.Models.Product;
+}
+<h2>Upload Document</h2>
+<form asp-action="UploadDocument" method="post" enctype="multipart/form-data">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="productId" value="@product.Id" />
+    <div class="mb-3">
+        <label class="form-label">Document Type</label>
+        <select name="documentType" class="form-select">
+            <option>Purchase Invoice</option>
+            <option>Warranty Certificate</option>
+            <option>Product Documents</option>
+        </select>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Choose file</label>
+        <input type="file" name="file" class="form-control" required />
+    </div>
+    <button class="btn btn-primary" type="submit">Upload</button>
+</form>

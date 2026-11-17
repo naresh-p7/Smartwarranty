@@ -1,0 +1,13 @@
+@{
+    ViewData["Title"] = "Reports";
+    var report = ViewBag.Report;
+}
+<h2>Reports</h2>
+<div class="row g-3">
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Registered Customers</div><div class="display-6">@report.Customers</div></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Registered Products</div><div class="display-6">@report.Products</div></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Active Warranties</div><div class="display-6">@report.Active</div></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Expired Warranties</div><div class="display-6">@report.Expired</div></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Expiring Soon</div><div class="display-6">@report.ExpiringSoon</div></div></div></div></div>
+    <div class="col-md-4"><div class="card"><div class="card-body"><div class="text-muted">Service Requests</div><div class="display-6">@report.ServiceRequests</div></div></div></div></div>
+</div>

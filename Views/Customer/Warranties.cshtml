@@ -1,0 +1,7 @@
+@model IEnumerable<SmartWarranty_2.Models.Warranty>
+@{
+    ViewData["Title"] = "Warranty Management";
+}
+<h2>Warranty Management</h2>
+<a class="btn btn-primary mb-3" asp-action="AddWarranty">Add Warranty</a>
+<table class="table table-striped"><thead><tr><th>Product</th><th>Type</th><th>Start Date</th><th>Expiry Date</th><th>Status</th></tr></thead><tbody>@foreach(var warranty in Model){<tr><td>@warranty.Product.Name</td><td>@warranty.WarrantyType</td><td>@warranty.StartDate.ToShortDateString()</td><td>@warranty.ExpiryDate.ToShortDateString()</td><td>@SmartWarranty_2.Services.WarrantyStatusService.GetStatus(warranty)</td></tr>}</tbody></table>

@@ -1,0 +1,13 @@
+@model IEnumerable<SmartWarranty_2.Models.Customer>
+@{
+    ViewData["Title"] = "Customers";
+}
+<h2>Customer Management</h2>
+<table class="table table-striped">
+    <thead><tr><th>ID</th><th>Name</th><th>Email</th><th>Phone</th><th>Address</th></tr></thead>
+    <tbody>
+        @foreach (var c in Model){
+            <tr><td>@c.Id</td><td>@c.FirstName @c.LastName</td><td>@c.Email</td><td>@c.PhoneNumber</td><td>@c.Address</td></tr>
+        }
+    </tbody>
+</table>

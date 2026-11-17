@@ -1,0 +1,18 @@
+@model IEnumerable<SmartWarranty_2.Models.ServiceRequest>
+@{
+    ViewData["Title"] = "Service Requests";
+}
+<h2>Service Request Management</h2>
+<table class="table table-striped"><thead><tr><th>ID</th><th>Customer</th><th>Product</th><th>Issue</th><th>Status</th><th>Tracking</th></tr></thead><tbody>@foreach(var r in Model){<tr><td>@r.ServiceRequestCode</td><td>@r.Customer.FirstName @r.Customer.LastName</td><td>@r.Product.Name</td><td>@r.IssueDescription</td><td>@r.Status</td><td>
+<form asp-action="UpdateServiceStatus" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="id" value="@r.Id" />
+    <div class="input-group input-group-sm">
+        <select name="status" class="form-select">
+            @foreach(var s in new[]{"Submitted","Redirected to Brand","Claim Registered","In Progress","Resolved","Closed"}){<option selected="@(s == r.Status)">@s</option>}
+        </select>
+        <input name="trackingInfo" value="@r.TrackingInfo" class="form-control" />
+        <button class="btn btn-outline-primary" type="submit">Update</button>
+    </div>
+</form>
+</td></tr>}</tbody></table>

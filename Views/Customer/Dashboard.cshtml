@@ -1,0 +1,76 @@
+@model SmartWarranty_2.Models.Customer
+@{
+    ViewData["Title"] = "Customer Dashboard";
+    var m = ViewBag.Metrics as Dictionary<string, int> ?? new Dictionary<string, int>();
+}
+
+<h2>Welcome, @Model.FirstName</h2>
+<div class="d-flex flex-wrap gap-2 mb-4">
+    <a class="btn btn-primary" asp-action="RegisterProduct">Register Product</a>
+    <a class="btn btn-outline-primary" asp-action="Products">My Products</a>
+    <a class="btn btn-outline-primary" asp-action="Warranties">Warranties</a>
+    <a class="btn btn-outline-primary" asp-action="ServiceRequests">Service Requests</a>
+    <a class="btn btn-outline-secondary" asp-action="Profile">My Profile</a>
+</div>
+<div class="row g-3 mb-4">
+    @foreach (var item in new[] {
+       new { Label = "Total Registered Products", Value = m.ContainsKey("Products") ? m["Products"] : 0 },
+       new { Label = "Active Warranties", Value = m.ContainsKey("ActiveWarranties") ? m["ActiveWarranties"] : 0 },
+       new { Label = "Expired Warranties", Value = m.ContainsKey("ExpiredWarranties") ? m["ExpiredWarranties"] : 0 },
+       new { Label = "Expiring Soon", Value = m.ContainsKey("ExpiringSoonWarranties") ? m["ExpiringSoonWarranties"] : 0 },
+       new { Label = "Total Service Requests", Value = m.ContainsKey("TotalServiceRequests") ? m["TotalServiceRequests"] : 0 },
+       new { Label = "Resolved Requests", Value = m.ContainsKey("ResolvedServiceRequests") ? m["ResolvedServiceRequests"] : 0 }
+    })
+    {
+        <div class="col-md-4"><div class="card border-0 shadow-sm h-100"><div class="card-body"><div class="text-muted small">@item.Label</div><div class="display-6 fw-bold">@item.Value</div></div></div></div>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5>Recently Registered Products</h5>
+                @{
+                    var recentProducts = ViewBag.RecentProducts as IEnumerable<SmartWarranty_2.Models.Product> ?? Enumerable.Empty<SmartWarranty_2.Models.Product>();
+                }
+                @if (recentProducts.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var product in recentProducts)
+                        {
+                            <li class="list-group-item">@product.Name</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">You have not registered any products yet.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5>Upcoming Warranty Expiry</h5>
+                @{
+                    var upcomingWarranties = ViewBag.UpcomingWarranties as IEnumerable<SmartWarranty_2.Models.Warranty> ?? Enumerable.Empty<SmartWarranty_2.Models.Warranty>();
+                }
+                @if (upcomingWarranties.Any())
+                {
+                    <ul class="list-group list-group-flush">
+                        @foreach (var warranty in upcomingWarranties)
+                        {
+                            <li class="list-group-item">@warranty.Product.Name - @warranty.ExpiryDate.ToShortDateString()</li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted mb-0">No warranty records yet. Add a warranty after registering a product.</p>
+                }
+            </div>
+        </div>
+    </div>
+</div>

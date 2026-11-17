@@ -1,0 +1,58 @@
+@{
+    ViewData["Title"] = "Admin Dashboard";
+    var m = ViewBag.Metrics as Dictionary<string, int> ?? new Dictionary<string, int>();
+}
+
+<h2>Administrator Dashboard</h2>
+<div class="row g-3 mb-4">
+    @foreach (var item in new[] {
+       new { Label = "Total Registered Customers", Value = m.ContainsKey("TotalCustomers") ? m["TotalCustomers"] : 0 },
+       new { Label = "Total Registered Products", Value = m.ContainsKey("TotalProducts") ? m["TotalProducts"] : 0 },
+       new { Label = "Total Warranty Records", Value = m.ContainsKey("TotalWarranties") ? m["TotalWarranties"] : 0 },
+       new { Label = "Active Warranties", Value = m.ContainsKey("ActiveWarranties") ? m["ActiveWarranties"] : 0 },
+       new { Label = "Expired Warranties", Value = m.ContainsKey("ExpiredWarranties") ? m["ExpiredWarranties"] : 0 },
+       new { Label = "Expiring Soon", Value = m.ContainsKey("ExpiringSoonWarranties") ? m["ExpiringSoonWarranties"] : 0 },
+       new { Label = "Total Service Requests", Value = m.ContainsKey("TotalServiceRequests") ? m["TotalServiceRequests"] : 0 },
+       new { Label = "Pending / In Progress", Value = m.ContainsKey("PendingRequests") ? m["PendingRequests"] : 0 },
+       new { Label = "Resolved", Value = m.ContainsKey("ResolvedRequests") ? m["ResolvedRequests"] : 0 }
+    })
+    {
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <div class="text-muted small">@item.Label</div>
+                    <div class="display-6 fw-bold">@item.Value</div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5>Recent Customers</h5>
+                <ul class="list-group list-group-flush">
+                    @foreach (var customer in ViewBag.Customers as IEnumerable<SmartWarranty_2.Models.Customer> ?? Enumerable.Empty<SmartWarranty_2.Models.Customer>())
+                    {
+                        <li class="list-group-item">@customer.FirstName @customer.LastName - @customer.Email</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5>Recent Service Requests</h5>
+                <ul class="list-group list-group-flush">
+                    @foreach (var req in ViewBag.RecentRequests as IEnumerable<SmartWarranty_2.Models.ServiceRequest> ?? Enumerable.Empty<SmartWarranty_2.Models.ServiceRequest>())
+                    {
+                        <li class="list-group-item">@req.ServiceRequestCode - @req.Product.Name - @req.Status</li>
+                    }
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

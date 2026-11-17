@@ -1,0 +1,6 @@
+@model IEnumerable<SmartWarranty_2.Models.Notification>
+@{
+    ViewData["Title"] = "Notifications";
+}
+<h2>Notifications</h2>
+<ul class="list-group">@foreach(var n in Model){<li class="list-group-item"><strong>@n.Title</strong><div>@n.Message</div><small class="text-muted">@n.CreatedAt.ToString("g")</small></li>}</ul>

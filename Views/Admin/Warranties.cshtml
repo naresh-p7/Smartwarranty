@@ -1,0 +1,6 @@
+@model IEnumerable<SmartWarranty_2.Models.Warranty>
+@{
+    ViewData["Title"] = "Warranty Information";
+}
+<h2>Warranty Information</h2>
+<table class="table table-striped"><thead><tr><th>Product</th><th>Customer</th><th>Start</th><th>Expiry</th><th>Type</th></tr></thead><tbody>@foreach(var w in Model){<tr><td>@w.Product.Name</td><td>@w.Product.Customer.FirstName @w.Product.Customer.LastName</td><td>@w.StartDate.ToShortDateString()</td><td>@w.ExpiryDate.ToShortDateString()</td><td>@w.WarrantyType</td></tr>}</tbody></table>

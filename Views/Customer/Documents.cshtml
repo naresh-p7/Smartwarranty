@@ -1,0 +1,6 @@
+@model IEnumerable<SmartWarranty_2.Models.ProductDocument>
+@{
+    ViewData["Title"] = "Documents";
+}
+<h2>My Documents</h2>
+<table class="table table-striped"><thead><tr><th>Product</th><th>Type</th><th>File</th><th>Action</th></tr></thead><tbody>@foreach(var d in Model){<tr><td>@d.Product.Name</td><td>@d.DocumentType</td><td>@d.FileName</td><td><a class="btn btn-sm btn-outline-primary" asp-action="DownloadDocument" asp-route-id="@d.Id">Download</a> <a class="btn btn-sm btn-outline-danger" asp-action="DeleteDocument" asp-route-id="@d.Id" onclick="return confirm('Delete this document?');">Delete</a></td></tr>}</tbody></table>
