@@ -210,9 +210,16 @@ namespace Smartwarranty_2.Migrations
                         .HasMaxLength(150)
                         .HasColumnType("nvarchar(150)");
 
+                    b.Property<int?>("WarrantyId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
+
+                    b.HasIndex("WarrantyId")
+                        .IsUnique()
+                        .HasFilter("[WarrantyId] IS NOT NULL");
 
                     b.ToTable("Notifications");
                 });
@@ -438,6 +445,9 @@ namespace Smartwarranty_2.Migrations
                     b.Property<DateTime>("UpdatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<bool?>("WarrantyClaimed")
+                        .HasColumnType("bit");
+
                     b.HasKey("Id");
 
                     b.HasIndex("CustomerId");
@@ -493,7 +503,14 @@ namespace Smartwarranty_2.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("SmartWarranty_2.Models.Warranty", "Warranty")
+                        .WithMany()
+                        .HasForeignKey("WarrantyId")
+                        .OnDelete(DeleteBehavior.NoAction);
+
                     b.Navigation("Customer");
+
+                    b.Navigation("Warranty");
                 });
 
             modelBuilder.Entity("SmartWarranty_2.Models.Product", b =>

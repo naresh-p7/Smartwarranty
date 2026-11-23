@@ -9,6 +9,8 @@ SmartWarranty is a database-driven ASP.NET Core MVC application for digital warr
 - Product registration and customer-specific access
 - Warranty tracking with active / expiring soon / expired status
 - Document upload, download, and deletion for customer-owned products
+- Product-specific manufacturer warranty links and product deletion
+- Local invoice text extraction and image OCR with a customer review step
 - Manufacturer support links
 - Service request submission and status tracking
 - SQL Server-backed persistence through Entity Framework Core
@@ -61,3 +63,5 @@ Customer 1:N Notification
 ## Notes
 
 This project implements the core SmartWarranty business flow and database-backed workflow for a real-world demo. The final warranty approval remains under the control of the manufacturer, as required by the specification.
+
+Invoice recognition runs locally. Text-based PDFs are read directly, scanned PDFs are rendered locally on Windows for OCR (up to three pages), and uploaded image invoices are processed with Tesseract. Extracted product, purchase, and warranty fields are presented for customer review before saving. Warranty duration is only suggested when stated in the invoice; customers should confirm it against the warranty terms.

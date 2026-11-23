@@ -49,6 +49,7 @@ public class AdminController : Controller
     {
         if (!ModelState.IsValid)
         {
+            TempData["ErrorMessage"] = "Enter valid brand and support details.";
             return RedirectToAction(nameof(Brands));
         }
 
@@ -62,6 +63,42 @@ public class AdminController : Controller
         _context.Brands.Add(brand);
         await _context.SaveChangesAsync();
         TempData["SuccessMessage"] = "Brand added successfully.";
+        return RedirectToAction(nameof(Brands));
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateBrand([Bind("Id,Name,OfficialWebsiteUrl,WarrantyClaimUrl,SupportPhoneNumber,SupportEmailAddress,Description")] Brand brand)
+    {
+        if (!ModelState.IsValid)
+        {
+            TempData["ErrorMessage"] = "Enter valid brand and support details.";
+            return RedirectToAction(nameof(Brands));
+        }
+
+        var existingBrand = await _context.Brands.FindAsync(brand.Id);
+        if (existingBrand == null)
+        {
+            return NotFound();
+        }
+
+        var duplicateName = await _context.Brands.AnyAsync(b => b.Id != brand.Id && b.Name == brand.Name);
+        if (duplicateName)
+        {
+            TempData["ErrorMessage"] = "Another brand already uses that name.";
+            return RedirectToAction(nameof(Brands));
+        }
+
+        existingBrand.Name = brand.Name;
+        existingBrand.OfficialWebsiteUrl = brand.OfficialWebsiteUrl;
+        existingBrand.WarrantyClaimUrl = brand.WarrantyClaimUrl;
+        existingBrand.SupportPhoneNumber = brand.SupportPhoneNumber;
+        existingBrand.SupportEmailAddress = brand.SupportEmailAddress;
+        existingBrand.Description = brand.Description;
+        existingBrand.UpdatedAt = DateTime.UtcNow;
+
+        await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = "Brand details updated successfully.";
         return RedirectToAction(nameof(Brands));
     }
 
@@ -162,9 +199,10 @@ public class AdminController : Controller
     {
         var customers = await _context.Customers.CountAsync();
         var products = await _context.Products.CountAsync();
-        var active = await _context.Warranties.CountAsync(w => w.StartDate <= DateTime.UtcNow && w.ExpiryDate >= DateTime.UtcNow);
-        var expired = await _context.Warranties.CountAsync(w => w.ExpiryDate < DateTime.UtcNow);
-        var expiringSoon = await _context.Warranties.CountAsync(w => w.ExpiryDate >= DateTime.UtcNow && w.ExpiryDate <= DateTime.UtcNow.AddDays(30));
+        var today = DateTime.UtcNow.Date;
+        var active = await _context.Warranties.CountAsync(w => w.StartDate < today.AddDays(1) && w.ExpiryDate >= today);
+        var expired = await _context.Warranties.CountAsync(w => w.ExpiryDate < today);
+        var expiringSoon = await _context.Warranties.CountAsync(w => w.ExpiryDate >= today && w.ExpiryDate < today.AddDays(31));
         var serviceRequests = await _context.ServiceRequests.CountAsync();
         var resolved = await _context.ServiceRequests.CountAsync(s => s.Status == "Resolved" || s.Status == "Closed");
 

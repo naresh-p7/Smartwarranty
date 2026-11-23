@@ -19,13 +19,14 @@ public class DashboardService
         var totalProducts = await _context.Products.CountAsync();
         var totalWarranties = await _context.Warranties.CountAsync();
 
-        var now = DateTime.UtcNow;
-        var activeWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate >= now && w.StartDate <= now);
-        var expiredWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate < now);
+        var today = DateTime.UtcNow.Date;
+        var tomorrow = today.AddDays(1);
+        var activeWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate >= today && w.StartDate < tomorrow);
+        var expiredWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate < today);
 
         var expiringSoonThresholdDays = 30;
-        var expiringSoonWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate >= now
-            && w.ExpiryDate <= now.AddDays(expiringSoonThresholdDays));
+        var expiringSoonWarranties = await _context.Warranties.CountAsync(w => w.ExpiryDate >= today
+            && w.ExpiryDate < today.AddDays(expiringSoonThresholdDays + 1));
 
         var totalServiceRequests = await _context.ServiceRequests.CountAsync();
         var pendingRequests = await _context.ServiceRequests.CountAsync(s => s.Status != "Resolved" && s.Status != "Closed");
@@ -58,10 +59,10 @@ public class DashboardService
             .Where(s => s.CustomerId == customerId)
             .ToListAsync();
 
-        var now = DateTime.UtcNow;
-        var active = warranties.Count(w => w.ExpiryDate >= now && w.StartDate <= now);
-        var expired = warranties.Count(w => w.ExpiryDate < now);
-        var expiringSoon = warranties.Count(w => w.ExpiryDate >= now && w.ExpiryDate <= now.AddDays(30));
+        var today = DateTime.UtcNow.Date;
+        var active = warranties.Count(w => w.ExpiryDate.Date >= today && w.StartDate.Date <= today);
+        var expired = warranties.Count(w => w.ExpiryDate.Date < today);
+        var expiringSoon = warranties.Count(w => w.ExpiryDate.Date >= today && w.ExpiryDate.Date <= today.AddDays(30));
 
         return new Dictionary<string, int>
         {

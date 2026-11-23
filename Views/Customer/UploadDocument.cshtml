@@ -5,7 +5,7 @@
 <h2>Upload Document</h2>
 <form asp-action="UploadDocument" method="post" enctype="multipart/form-data">
     @Html.AntiForgeryToken()
-    <input type="hidden" name="productId" value="@product.Id" />
+    <input type="hidden" name="productId" value="@product?.Id" />
     <div class="mb-3">
         <label class="form-label">Document Type</label>
         <select name="documentType" class="form-select">
@@ -16,7 +16,8 @@
     </div>
     <div class="mb-3">
         <label class="form-label">Choose file</label>
-        <input type="file" name="file" class="form-control" required />
+        <input type="file" name="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png,.webp" required />
     </div>
+    <div class="form-text mb-3">Purchase invoices are read locally to suggest product and purchase details for your review.</div>
     <button class="btn btn-primary" type="submit">Upload</button>
 </form>

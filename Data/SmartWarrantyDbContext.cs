@@ -60,6 +60,11 @@ public class SmartWarrantyDbContext : DbContext
             .HasIndex(s => s.ServiceRequestCode)
             .IsUnique();
 
+        modelBuilder.Entity<Notification>()
+            .HasIndex(n => n.WarrantyId)
+            .IsUnique()
+            .HasFilter("[WarrantyId] IS NOT NULL");
+
         modelBuilder.Entity<Product>()
             .HasOne(p => p.Customer)
             .WithMany(c => c.Products)
@@ -113,5 +118,11 @@ public class SmartWarrantyDbContext : DbContext
             .WithMany(c => c.Notifications)
             .HasForeignKey(n => n.CustomerId)
             .OnDelete(DeleteBehavior.Cascade);
+
+        modelBuilder.Entity<Notification>()
+            .HasOne(n => n.Warranty)
+            .WithMany()
+            .HasForeignKey(n => n.WarrantyId)
+            .OnDelete(DeleteBehavior.NoAction);
     }
 }

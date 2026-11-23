@@ -13,7 +13,7 @@ else
     <div class="table-responsive">
         <table class="table table-striped align-middle">
             <thead>
-                <tr><th>Name</th><th>Brand</th><th>Category</th><th>Model</th><th>Serial</th><th>Actions</th></tr>
+                <tr><th>Name</th><th>Brand</th><th>Category</th><th>Model</th><th>Serial</th><th>Manufacturer</th><th>Actions</th></tr>
             </thead>
             <tbody>
                 @foreach (var product in Model)
@@ -25,10 +25,27 @@ else
                         <td>@product.ModelNumber</td>
                         <td>@product.SerialNumber</td>
                         <td>
+                            @if (Uri.TryCreate(product.Brand.WarrantyClaimUrl, UriKind.Absolute, out var claimUrl)
+                                && (claimUrl.Scheme == Uri.UriSchemeHttps || claimUrl.Scheme == Uri.UriSchemeHttp))
+                            {
+                                <a href="@claimUrl" target="_blank" rel="noopener noreferrer">Warranty claim</a>
+                            }
+                            @if (Uri.TryCreate(product.Brand.OfficialWebsiteUrl, UriKind.Absolute, out var websiteUrl)
+                                && (websiteUrl.Scheme == Uri.UriSchemeHttps || websiteUrl.Scheme == Uri.UriSchemeHttp))
+                            {
+                                <a class="d-block" href="@websiteUrl" target="_blank" rel="noopener noreferrer">Manufacturer website</a>
+                            }
+                        </td>
+                        <td>
                             <div class="d-flex flex-wrap gap-1">
                                 <a class="btn btn-sm btn-outline-primary" asp-action="AddWarranty" asp-route-productId="@product.Id">Add Warranty</a>
                                 <a class="btn btn-sm btn-outline-secondary" asp-action="UploadDocument" asp-route-productId="@product.Id">Upload Document</a>
                                 <a class="btn btn-sm btn-outline-secondary" asp-action="CreateServiceRequest" asp-route-productId="@product.Id">Request Service</a>
+                                <form asp-action="DeleteProduct" method="post" onsubmit="return confirm('Delete this product and its warranties and documents? Products with service request history cannot be deleted.');">
+                                    @Html.AntiForgeryToken()
+                                    <input type="hidden" name="id" value="@product.Id" />
+                                    <button class="btn btn-sm btn-outline-danger" type="submit">Delete Product</button>
+                                </form>
                             </div>
                         </td>
                     </tr>

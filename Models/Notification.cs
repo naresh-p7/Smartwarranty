@@ -12,6 +12,10 @@ public class Notification
     public int CustomerId { get; set; }
     public Customer Customer { get; set; } = null!;
 
+    [ForeignKey(nameof(Warranty))]
+    public int? WarrantyId { get; set; }
+    public Warranty? Warranty { get; set; }
+
     [Required, StringLength(150)]
     public string Title { get; set; } = string.Empty;
 

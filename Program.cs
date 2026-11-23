@@ -6,6 +6,7 @@ using SmartWarranty_2.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<WarrantyExpiryNotificationFilter>();
 
 builder.Services.AddDbContext<SmartWarrantyDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -21,6 +22,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
 builder.Services.AddAuthorization();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<DashboardService>();
+builder.Services.AddScoped<IInvoiceRecognitionService, InvoiceRecognitionService>();
 
 var app = builder.Build();
 

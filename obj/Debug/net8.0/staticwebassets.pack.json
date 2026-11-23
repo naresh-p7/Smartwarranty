@@ -245,6 +245,14 @@
       "PackagePath": "staticwebassets\\lib\\jquery\\dist\\jquery.min.map"
     },
     {
+      "Id": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\uploads\\73992360-234d-4f45-8e80-8296888a42c4.pdf",
+      "PackagePath": "staticwebassets\\uploads\\73992360-234d-4f45-8e80-8296888a42c4.pdf"
+    },
+    {
+      "Id": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\uploads\\769ff67f-ee59-4977-a1d6-b085ef4bf945.pdf",
+      "PackagePath": "staticwebassets\\uploads\\769ff67f-ee59-4977-a1d6-b085ef4bf945.pdf"
+    },
+    {
       "Id": "obj\\Debug\\net8.0\\staticwebassets\\msbuild.Smartwarranty_2.Microsoft.AspNetCore.StaticWebAssets.props",
       "PackagePath": "build\\Microsoft.AspNetCore.StaticWebAssets.props"
     },

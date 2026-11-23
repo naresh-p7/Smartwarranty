@@ -3,4 +3,41 @@
     ViewData["Title"] = "Service History";
 }
 <h2>Service History</h2>
-<table class="table table-striped"><thead><tr><th>Request</th><th>Product</th><th>Status</th><th>Issue</th><th>Claim Reference</th></tr></thead><tbody>@foreach(var req in Model){<tr><td>@req.ServiceRequestCode</td><td>@req.Product.Name</td><td>@req.Status</td><td>@req.IssueDescription</td><td>@req.ClaimReferenceNumber</td></tr>}</tbody></table>
+<table class="table table-striped">
+    <thead>
+        <tr><th>Request</th><th>Product</th><th>Service Status</th><th>Warranty Claim</th><th>Issue</th><th>Claim Reference</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var req in Model)
+        {
+            <tr>
+                <td>@req.ServiceRequestCode</td>
+                <td>@req.Product.Name</td>
+                <td>@req.Status</td>
+                <td>
+                    <form asp-action="UpdateWarrantyClaimStatus" method="post" class="d-flex gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@req.Id" />
+                        <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                        <select name="warrantyClaimed" class="form-select form-select-sm">
+                            <option value="" selected="@(req.WarrantyClaimed == null)">Not specified</option>
+                            <option value="true" selected="@(req.WarrantyClaimed == true)">Claimed</option>
+                            <option value="false" selected="@(req.WarrantyClaimed == false)">Not claimed</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                    </form>
+                </td>
+                <td>@req.IssueDescription</td>
+                <td>@req.ClaimReferenceNumber</td>
+            </tr>
+            @foreach (var history in req.Histories.OrderByDescending(h => h.ChangedAt))
+            {
+                <tr class="table-light">
+                    <td colspan="2"><small>@history.ChangedAt.ToLocalTime().ToString("g")</small></td>
+                    <td>@history.Status</td>
+                    <td colspan="3">@history.Notes</td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>

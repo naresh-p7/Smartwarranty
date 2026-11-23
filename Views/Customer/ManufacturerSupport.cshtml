@@ -1,6 +1,77 @@
-@model IEnumerable<SmartWarranty_2.Models.Brand>
+@model SmartWarranty_2.Models.Brand?
 @{
     ViewData["Title"] = "Manufacturer Support";
+    var brands = ViewBag.Brands as IEnumerable<SmartWarranty_2.Models.Brand>
+        ?? Enumerable.Empty<SmartWarranty_2.Models.Brand>();
 }
 <h2>Manufacturer Support</h2>
-<table class="table table-striped"><thead><tr><th>Brand</th><th>Website</th><th>Claim URL</th><th>Support Phone</th><th>Support Email</th></tr></thead><tbody>@foreach(var brand in Model){<tr><td>@brand.Name</td><td><a href="@brand.OfficialWebsiteUrl" target="_blank">Website</a></td><td><a href="@brand.WarrantyClaimUrl" target="_blank">Claim</a></td><td>@brand.SupportPhoneNumber</td><td>@brand.SupportEmailAddress</td></tr>}</tbody></table>
+<p class="text-muted">Choose a manufacturer to view its warranty application link and support contacts.</p>
+@if (!brands.Any())
+{
+    <div class="alert alert-info">Manufacturer warranty links and support contacts have not been added yet.</div>
+}
+else
+{
+    <form asp-action="ManufacturerSupport" method="get" class="mb-4">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-6">
+                <label for="brandId" class="form-label">Brand</label>
+                <select id="brandId" name="brandId" class="form-select">
+                    <option value="">Select a brand</option>
+                    @foreach (var brand in brands)
+                    {
+                        if (Model?.Id == brand.Id)
+                        {
+                            <option value="@brand.Id" selected>@brand.Name</option>
+                        }
+                        else
+                        {
+                            <option value="@brand.Id">@brand.Name</option>
+                        }
+                    }
+                </select>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary">Show support</button>
+            </div>
+        </div>
+    </form>
+
+    @if (Model != null)
+    {
+        <div class="card">
+            <div class="card-body">
+                <h3 class="card-title">@Model.Name</h3>
+                @if (Uri.TryCreate(Model.WarrantyClaimUrl, UriKind.Absolute, out var claimUrl)
+                    && (claimUrl.Scheme == Uri.UriSchemeHttps || claimUrl.Scheme == Uri.UriSchemeHttp))
+                {
+                    <a class="btn btn-primary mb-3" href="@claimUrl" target="_blank" rel="noopener noreferrer">
+                        Apply for warranty
+                    </a>
+                }
+                else
+                {
+                    <p class="text-muted">A warranty application link has not been added for this brand.</p>
+                }
+
+                @if (Uri.TryCreate(Model.OfficialWebsiteUrl, UriKind.Absolute, out var websiteUrl)
+                    && (websiteUrl.Scheme == Uri.UriSchemeHttps || websiteUrl.Scheme == Uri.UriSchemeHttp))
+                {
+                    <p><strong>Manufacturer website:</strong> <a href="@websiteUrl" target="_blank" rel="noopener noreferrer">@websiteUrl</a></p>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.SupportPhoneNumber))
+                {
+                    <p><strong>Support phone:</strong> @Model.SupportPhoneNumber</p>
+                }
+                @if (!string.IsNullOrWhiteSpace(Model.SupportEmailAddress))
+                {
+                    <p><strong>Support email:</strong> <a href="mailto:@Model.SupportEmailAddress">@Model.SupportEmailAddress</a></p>
+                }
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">Select a brand to view its warranty application link and support contacts.</div>
+    }
+}

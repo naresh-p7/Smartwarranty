@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -10,15 +11,21 @@ using SmartWarranty_2.ViewModels;
 namespace SmartWarranty_2.Controllers;
 
 [Authorize(Roles = "Customer")]
+[ServiceFilter(typeof(WarrantyExpiryNotificationFilter))]
 public class CustomerController : Controller
 {
     private readonly SmartWarrantyDbContext _context;
     private readonly DashboardService _dashboardService;
+    private readonly IInvoiceRecognitionService _invoiceRecognitionService;
 
-    public CustomerController(SmartWarrantyDbContext context, DashboardService dashboardService)
+    public CustomerController(
+        SmartWarrantyDbContext context,
+        DashboardService dashboardService,
+        IInvoiceRecognitionService invoiceRecognitionService)
     {
         _context = context;
         _dashboardService = dashboardService;
+        _invoiceRecognitionService = invoiceRecognitionService;
     }
 
     private int CurrentCustomerId => int.Parse(User.FindFirstValue("UserId") ?? "0");
@@ -76,6 +83,54 @@ public class CustomerController : Controller
         return View(products);
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DeleteProduct(int id)
+    {
+        var product = await _context.Products
+            .Include(p => p.Documents)
+            .FirstOrDefaultAsync(p => p.Id == id && p.CustomerId == CurrentCustomerId);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        if (await _context.ServiceRequests.AnyAsync(s => s.ProductId == id))
+        {
+            TempData["ErrorMessage"] = "This product has service request history and cannot be deleted.";
+            return RedirectToAction(nameof(Products));
+        }
+
+        var storedFileNames = product.Documents.Select(d => d.StoredFileName).ToList();
+        var warrantyIds = await _context.Warranties
+            .Where(w => w.ProductId == product.Id)
+            .Select(w => w.Id)
+            .ToArrayAsync();
+        if (warrantyIds.Length > 0)
+        {
+            var warrantyNotifications = await _context.Notifications
+                .Where(n => n.WarrantyId.HasValue && warrantyIds.Contains(n.WarrantyId.Value))
+                .ToListAsync();
+            _context.Notifications.RemoveRange(warrantyNotifications);
+        }
+
+        _context.Products.Remove(product);
+        await _context.SaveChangesAsync();
+
+        var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
+        foreach (var storedFileName in storedFileNames)
+        {
+            var path = Path.Combine(uploadsPath, storedFileName);
+            if (System.IO.File.Exists(path))
+            {
+                System.IO.File.Delete(path);
+            }
+        }
+
+        TempData["SuccessMessage"] = "Product and its warranties and documents were deleted.";
+        return RedirectToAction(nameof(Products));
+    }
+
     public async Task<IActionResult> RegisterProduct()
     {
         ViewBag.Brands = await _context.Brands.OrderBy(b => b.Name).ToListAsync();
@@ -103,6 +158,11 @@ public class CustomerController : Controller
         else if (string.IsNullOrWhiteSpace(model.BrandName))
         {
             ModelState.AddModelError(nameof(model.BrandName), "Select a brand or enter its name.");
+        }
+
+        if (model.PurchaseDate.Date > DateTime.UtcNow.Date)
+        {
+            ModelState.AddModelError(nameof(model.PurchaseDate), "Purchase date cannot be in the future.");
         }
 
         var categoryExists = await _context.ProductCategories.AnyAsync(c => c.Id == model.CategoryId);
@@ -195,17 +255,23 @@ public class CustomerController : Controller
             ModelState.AddModelError(nameof(model.ProductId), "Select one of your registered products.");
         }
 
+        if (model.StartDate.Date > DateTime.UtcNow.Date)
+        {
+            ModelState.AddModelError(nameof(model.StartDate), "Warranty start date cannot be in the future.");
+        }
+
         if (!ModelState.IsValid)
         {
             return View(model);
         }
 
+        var expiryDate = model.StartDate.Date.AddMonths(model.DurationMonths);
         var warranty = new Warranty
         {
             ProductId = model.ProductId,
-            StartDate = model.StartDate,
+            StartDate = model.StartDate.Date,
             DurationMonths = model.DurationMonths,
-            ExpiryDate = model.ExpiryDate,
+            ExpiryDate = expiryDate,
             WarrantyType = model.WarrantyType,
             CreatedAt = DateTime.UtcNow
         };
@@ -247,8 +313,9 @@ public class CustomerController : Controller
             return RedirectToAction(nameof(Documents));
         }
 
-        var allowedTypes = new[] { "application/pdf", "image/jpeg", "image/png", "image/webp" };
-        if (!allowedTypes.Contains(file.ContentType) && !new[] { ".pdf", ".jpg", ".jpeg", ".png", ".webp" }.Contains(Path.GetExtension(file.FileName).ToLowerInvariant()))
+        var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+        var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".webp" };
+        if (!allowedExtensions.Contains(extension))
         {
             TempData["ErrorMessage"] = "Unsupported file type.";
             return RedirectToAction(nameof(Documents));
@@ -260,10 +327,17 @@ public class CustomerController : Controller
             return RedirectToAction(nameof(Documents));
         }
 
+        InvoiceRecognitionResult? recognition = null;
+        if (documentType == "Purchase Invoice")
+        {
+            await using var invoiceStream = file.OpenReadStream();
+            recognition = await _invoiceRecognitionService.RecognizeAsync(invoiceStream, extension);
+        }
+
         var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads");
         Directory.CreateDirectory(uploadsPath);
 
-        var storedName = Guid.NewGuid() + Path.GetExtension(file.FileName);
+        var storedName = Guid.NewGuid() + extension;
         var fullPath = Path.Combine(uploadsPath, storedName);
         await using (var stream = new FileStream(fullPath, FileMode.Create))
         {
@@ -282,8 +356,111 @@ public class CustomerController : Controller
         });
 
         await _context.SaveChangesAsync();
+        if (recognition != null)
+        {
+            TempData["InvoiceReview"] = JsonSerializer.Serialize(new InvoiceReviewViewModel
+            {
+                ProductId = product.Id,
+                ProductName = recognition.ProductName ?? product.Name,
+                ModelNumber = recognition.ModelNumber ?? product.ModelNumber,
+                SerialNumber = recognition.SerialNumber ?? product.SerialNumber,
+                PurchaseDate = recognition.PurchaseDate ?? product.PurchaseDate,
+                SellerName = recognition.SellerName ?? product.SellerName,
+                WarrantyDurationMonths = recognition.WarrantyDurationMonths,
+                WarrantyStartDate = recognition.PurchaseDate ?? product.PurchaseDate,
+                ExtractedTextFound = recognition.HasRecognizedText
+            });
+            return RedirectToAction(nameof(ReviewInvoice));
+        }
+
         TempData["SuccessMessage"] = "Document uploaded successfully.";
         return RedirectToAction(nameof(Documents));
+    }
+
+    public IActionResult ReviewInvoice()
+    {
+        var serializedReview = TempData["InvoiceReview"] as string;
+        if (string.IsNullOrEmpty(serializedReview))
+        {
+            return RedirectToAction(nameof(Products));
+        }
+
+        var model = JsonSerializer.Deserialize<InvoiceReviewViewModel>(serializedReview);
+        if (model == null)
+        {
+            return RedirectToAction(nameof(Products));
+        }
+
+        return View(model);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> ReviewInvoice(InvoiceReviewViewModel model)
+    {
+        var product = await _context.Products
+            .FirstOrDefaultAsync(p => p.Id == model.ProductId && p.CustomerId == CurrentCustomerId);
+        if (product == null)
+        {
+            return NotFound();
+        }
+
+        if (model.PurchaseDate.Date > DateTime.UtcNow.Date)
+        {
+            ModelState.AddModelError(nameof(model.PurchaseDate), "Purchase date cannot be in the future.");
+        }
+
+        if (await _context.Products.AnyAsync(p =>
+                p.Id != model.ProductId &&
+                p.SerialNumber == model.SerialNumber.Trim()))
+        {
+            ModelState.AddModelError(nameof(model.SerialNumber), "A product with this serial number is already registered.");
+        }
+
+        if (model.WarrantyDurationMonths.HasValue)
+        {
+            var warrantyStartDate = model.WarrantyStartDate?.Date ?? model.PurchaseDate.Date;
+            if (warrantyStartDate > DateTime.UtcNow.Date)
+            {
+                ModelState.AddModelError(nameof(model.WarrantyStartDate), "Warranty start date cannot be in the future.");
+            }
+
+            if (string.IsNullOrWhiteSpace(model.WarrantyType))
+            {
+                ModelState.AddModelError(nameof(model.WarrantyType), "Enter the warranty type.");
+            }
+        }
+
+        if (!ModelState.IsValid)
+        {
+            return View(model);
+        }
+
+        product.Name = model.ProductName.Trim();
+        product.ModelNumber = model.ModelNumber.Trim();
+        product.SerialNumber = model.SerialNumber.Trim();
+        product.PurchaseDate = model.PurchaseDate.Date;
+        product.SellerName = model.SellerName.Trim();
+
+        if (model.WarrantyDurationMonths.HasValue)
+        {
+            var startDate = model.WarrantyStartDate?.Date ?? model.PurchaseDate.Date;
+            _context.Warranties.Add(new Warranty
+            {
+                ProductId = product.Id,
+                StartDate = startDate,
+                DurationMonths = model.WarrantyDurationMonths.Value,
+                ExpiryDate = startDate.AddMonths(model.WarrantyDurationMonths.Value),
+                WarrantyType = model.WarrantyType,
+                CreatedAt = DateTime.UtcNow
+            });
+        }
+
+        await _context.SaveChangesAsync();
+        TempData["SuccessMessage"] = model.WarrantyDurationMonths.HasValue
+            ? "Invoice details saved and warranty added."
+            : "Invoice details saved.";
+        return RedirectToAction(nameof(Products));
     }
 
     public async Task<IActionResult> DownloadDocument(int id)
@@ -325,16 +502,28 @@ public class CustomerController : Controller
         return View(products);
     }
 
-    public async Task<IActionResult> ManufacturerSupport()
+    public async Task<IActionResult> ManufacturerSupport(int? brandId)
     {
-        var brands = await _context.Brands.OrderBy(b => b.Name).ToListAsync();
-        return View(brands);
+        var brands = await _context.Brands
+            .Where(b => b.WarrantyClaimUrl != string.Empty
+                || b.OfficialWebsiteUrl != string.Empty
+                || b.SupportPhoneNumber != string.Empty
+                || b.SupportEmailAddress != string.Empty)
+            .OrderBy(b => b.Name)
+            .ToListAsync();
+        ViewBag.Brands = brands;
+
+        var selectedBrand = brandId.HasValue
+            ? brands.FirstOrDefault(b => b.Id == brandId.Value)
+            : null;
+        return View(selectedBrand);
     }
 
     public async Task<IActionResult> ServiceRequests()
     {
         var requests = await _context.ServiceRequests
             .Include(s => s.Product).ThenInclude(p => p.Brand)
+            .Include(s => s.Histories)
             .Where(s => s.CustomerId == CurrentCustomerId)
             .OrderByDescending(s => s.RequestDate)
             .ToListAsync();
@@ -417,10 +606,64 @@ public class CustomerController : Controller
         return RedirectToAction(nameof(ServiceRequests));
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> UpdateWarrantyClaimStatus(int id, string? warrantyClaimed, string? returnUrl = null)
+    {
+        bool? claimed;
+        if (warrantyClaimed == "true")
+        {
+            claimed = true;
+        }
+        else if (warrantyClaimed == "false")
+        {
+            claimed = false;
+        }
+        else if (string.IsNullOrEmpty(warrantyClaimed))
+        {
+            claimed = null;
+        }
+        else
+        {
+            return BadRequest();
+        }
+
+        var request = await _context.ServiceRequests
+            .FirstOrDefaultAsync(s => s.Id == id && s.CustomerId == CurrentCustomerId);
+        if (request == null)
+        {
+            return NotFound();
+        }
+
+        if (request.WarrantyClaimed != claimed)
+        {
+            request.WarrantyClaimed = claimed;
+            request.UpdatedAt = DateTime.UtcNow;
+            _context.ServiceHistories.Add(new ServiceHistory
+            {
+                ServiceRequestId = request.Id,
+                Status = request.Status,
+                Notes = $"Warranty claim status changed to {(claimed == true ? "Claimed" : claimed == false ? "Not claimed" : "Not specified")}.",
+                ChangedAt = DateTime.UtcNow
+            });
+
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Warranty claim status updated.";
+        }
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction(nameof(ServiceRequests));
+    }
+
     public async Task<IActionResult> ServiceHistory()
     {
         var histories = await _context.ServiceRequests
             .Include(s => s.Product).ThenInclude(p => p.Brand)
+            .Include(s => s.Histories)
             .Where(s => s.CustomerId == CurrentCustomerId)
             .OrderByDescending(s => s.RequestDate)
             .ToListAsync();
@@ -430,7 +673,33 @@ public class CustomerController : Controller
 
     public async Task<IActionResult> Notifications()
     {
-        var notifications = await _context.Notifications.Where(n => n.CustomerId == CurrentCustomerId).OrderByDescending(n => n.CreatedAt).ToListAsync();
+        var notifications = await _context.Notifications
+            .Where(n => n.CustomerId == CurrentCustomerId)
+            .OrderBy(n => n.IsRead)
+            .ThenByDescending(n => n.CreatedAt)
+            .ToListAsync();
         return View(notifications);
+    }
+
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> DismissNotification(int id, string? returnUrl = null)
+    {
+        var notification = await _context.Notifications
+            .FirstOrDefaultAsync(n => n.Id == id && n.CustomerId == CurrentCustomerId);
+        if (notification == null)
+        {
+            return NotFound();
+        }
+
+        notification.IsRead = true;
+        await _context.SaveChangesAsync();
+
+        if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
+        {
+            return Redirect(returnUrl);
+        }
+
+        return RedirectToAction(nameof(Notifications));
     }
 }

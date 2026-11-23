@@ -8,14 +8,21 @@ public static class WarrantyStatusService
 
     public static string GetStatus(Warranty warranty)
     {
-        var today = DateTime.UtcNow;
+        var today = DateTime.UtcNow.Date;
+        var startDate = warranty.StartDate.Date;
+        var expiryDate = warranty.ExpiryDate.Date;
 
-        if (warranty.ExpiryDate < today)
+        if (expiryDate < today)
         {
             return "Expired";
         }
 
-        if (warranty.ExpiryDate <= today.AddDays(ExpiringSoonThresholdDays))
+        if (startDate > today)
+        {
+            return "Not Started";
+        }
+
+        if (expiryDate <= today.AddDays(ExpiringSoonThresholdDays))
         {
             return "Expiring Soon";
         }
@@ -25,6 +32,7 @@ public static class WarrantyStatusService
 
     public static bool IsEligible(Warranty warranty)
     {
-        return warranty.StartDate <= DateTime.UtcNow && warranty.ExpiryDate >= DateTime.UtcNow;
+        var today = DateTime.UtcNow.Date;
+        return warranty.StartDate.Date <= today && warranty.ExpiryDate.Date >= today;
     }
 }

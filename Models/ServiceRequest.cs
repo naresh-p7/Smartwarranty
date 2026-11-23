@@ -30,6 +30,8 @@ public class ServiceRequest
     [StringLength(100)]
     public string ClaimReferenceNumber { get; set; } = string.Empty;
 
+    public bool? WarrantyClaimed { get; set; }
+
     [Required, StringLength(40)]
     public string Status { get; set; } = "Submitted";
 

@@ -3,4 +3,35 @@
     ViewData["Title"] = "Notifications";
 }
 <h2>Notifications</h2>
-<ul class="list-group">@foreach(var n in Model){<li class="list-group-item"><strong>@n.Title</strong><div>@n.Message</div><small class="text-muted">@n.CreatedAt.ToString("g")</small></li>}</ul>
+@if (Model.Any())
+{
+    <div class="list-group">
+        @foreach (var notification in Model)
+        {
+            <div class="list-group-item d-flex justify-content-between align-items-start gap-3">
+                <div>
+                    <strong>@notification.Title</strong>
+                    @if (notification.IsRead)
+                    {
+                        <span class="badge bg-secondary ms-2">Dismissed</span>
+                    }
+                    <div>@notification.Message</div>
+                    <small class="text-muted">@notification.CreatedAt.ToString("g")</small>
+                </div>
+                @if (!notification.IsRead)
+                {
+                    <form asp-action="DismissNotification" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@notification.Id" />
+                        <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                        <button class="btn btn-sm btn-outline-secondary" type="submit">Dismiss</button>
+                    </form>
+                }
+            </div>
+        }
+    </div>
+}
+else
+{
+    <p class="text-muted">You have no notifications yet.</p>
+}

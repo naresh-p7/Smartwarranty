@@ -4,13 +4,42 @@
 }
 <h2>Service Requests</h2>
 <a class="btn btn-primary mb-3" asp-action="CreateServiceRequest">Create Service Request</a>
-<table class="table table-striped"><thead><tr><th>ID</th><th>Product</th><th>Issue</th><th>Status</th><th>Claim Reference</th></tr></thead><tbody>@foreach(var req in Model){<tr><td>@req.ServiceRequestCode</td><td>@req.Product.Name</td><td>@req.IssueDescription</td><td>@req.Status</td><td>
-<form asp-action="UpdateClaimReference" method="post">
-    @Html.AntiForgeryToken()
-    <input type="hidden" name="id" value="@req.Id" />
-    <div class="input-group input-group-sm">
-        <input name="claimReferenceNumber" value="@req.ClaimReferenceNumber" class="form-control" />
-        <button class="btn btn-outline-primary" type="submit">Save</button>
-    </div>
-</form>
-</td></tr>}</tbody></table>
+<table class="table table-striped">
+    <thead>
+        <tr><th>ID</th><th>Product</th><th>Issue</th><th>Status</th><th>Warranty Claim</th><th>Claim Reference</th></tr>
+    </thead>
+    <tbody>
+        @foreach (var req in Model)
+        {
+            <tr>
+                <td>@req.ServiceRequestCode</td>
+                <td>@req.Product.Name</td>
+                <td>@req.IssueDescription</td>
+                <td>@req.Status</td>
+                <td>
+                    <form asp-action="UpdateWarrantyClaimStatus" method="post" class="d-flex gap-2">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@req.Id" />
+                        <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                        <select name="warrantyClaimed" class="form-select form-select-sm">
+                            <option value="" selected="@(req.WarrantyClaimed == null)">Not specified</option>
+                            <option value="true" selected="@(req.WarrantyClaimed == true)">Claimed</option>
+                            <option value="false" selected="@(req.WarrantyClaimed == false)">Not claimed</option>
+                        </select>
+                        <button class="btn btn-sm btn-outline-primary" type="submit">Save</button>
+                    </form>
+                </td>
+                <td>
+                    <form asp-action="UpdateClaimReference" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@req.Id" />
+                        <div class="input-group input-group-sm">
+                            <input name="claimReferenceNumber" value="@req.ClaimReferenceNumber" class="form-control" />
+                            <button class="btn btn-outline-primary" type="submit">Save</button>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

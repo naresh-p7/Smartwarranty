@@ -2,17 +2,73 @@
 @{
     ViewData["Title"] = "Brands";
 }
-<h2>Brand Management</h2>
-<form asp-action="CreateBrand" method="post" class="mb-4">
+<h2>Company / Brand Management</h2>
+<p class="text-muted">Add brands and maintain the warranty application links and support contacts shown to customers.</p>
+
+<form asp-action="CreateBrand" method="post" class="card card-body mb-4">
     @Html.AntiForgeryToken()
-    <div class="row g-2">
-        <div class="col-md-4"><input name="Name" class="form-control" placeholder="Brand name" required /></div>
-        <div class="col-md-4"><input name="OfficialWebsiteUrl" class="form-control" placeholder="Official website" /></div>
-        <div class="col-md-4"><input name="WarrantyClaimUrl" class="form-control" placeholder="Warranty claim URL" /></div>
-        <div class="col-md-4"><input name="SupportPhoneNumber" class="form-control" placeholder="Support phone" /></div>
-        <div class="col-md-4"><input name="SupportEmailAddress" class="form-control" placeholder="Support email" /></div>
-        <div class="col-md-12"><input name="Description" class="form-control" placeholder="Description" /></div>
+    <h5>Add Company / Brand</h5>
+    <div class="row g-3">
+        <div class="col-md-4">
+            <label for="Name" class="form-label">Company / brand name</label>
+            <input id="Name" name="Name" class="form-control" maxlength="120" required />
+        </div>
+        <div class="col-md-4">
+            <label for="OfficialWebsiteUrl" class="form-label">Direct website</label>
+            <input id="OfficialWebsiteUrl" name="OfficialWebsiteUrl" type="url" class="form-control" placeholder="https://example.com" />
+        </div>
+        <div class="col-md-4">
+            <label for="WarrantyClaimUrl" class="form-label">Warranty application URL</label>
+            <input id="WarrantyClaimUrl" name="WarrantyClaimUrl" type="url" class="form-control" placeholder="https://example.com/warranty" />
+        </div>
+        <div class="col-md-6">
+            <label for="SupportPhoneNumber" class="form-label">Support phone</label>
+            <input id="SupportPhoneNumber" name="SupportPhoneNumber" type="tel" class="form-control" />
+        </div>
+        <div class="col-md-6">
+            <label for="SupportEmailAddress" class="form-label">Support email</label>
+            <input id="SupportEmailAddress" name="SupportEmailAddress" type="email" class="form-control" />
+        </div>
+        <div class="col-12">
+            <label for="Description" class="form-label">Description</label>
+            <input id="Description" name="Description" class="form-control" maxlength="500" />
+        </div>
     </div>
-    <button class="btn btn-primary mt-2" type="submit">Add Brand</button>
+    <div><button class="btn btn-primary mt-3" type="submit">Add Company / Brand</button></div>
 </form>
-<table class="table table-striped"><thead><tr><th>Name</th><th>Website</th><th>Support Phone</th><th>Email</th></tr></thead><tbody>@foreach(var b in Model){<tr><td>@b.Name</td><td>@b.OfficialWebsiteUrl</td><td>@b.SupportPhoneNumber</td><td>@b.SupportEmailAddress</td></tr>}</tbody></table>
+
+<h4>Company details</h4>
+@foreach (var brand in Model)
+{
+    <form asp-action="UpdateBrand" method="post" class="card card-body mb-3">
+        @Html.AntiForgeryToken()
+        <input type="hidden" name="Id" value="@brand.Id" />
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="Name-@brand.Id" class="form-label">Company / brand name</label>
+                <input id="Name-@brand.Id" name="Name" value="@brand.Name" class="form-control" maxlength="120" required />
+            </div>
+            <div class="col-md-4">
+                <label for="Website-@brand.Id" class="form-label">Direct website</label>
+                <input id="Website-@brand.Id" name="OfficialWebsiteUrl" value="@brand.OfficialWebsiteUrl" type="url" class="form-control" />
+            </div>
+            <div class="col-md-4">
+                <label for="Claim-@brand.Id" class="form-label">Warranty application URL</label>
+                <input id="Claim-@brand.Id" name="WarrantyClaimUrl" value="@brand.WarrantyClaimUrl" type="url" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="Phone-@brand.Id" class="form-label">Support phone</label>
+                <input id="Phone-@brand.Id" name="SupportPhoneNumber" value="@brand.SupportPhoneNumber" type="tel" class="form-control" />
+            </div>
+            <div class="col-md-6">
+                <label for="Email-@brand.Id" class="form-label">Support email</label>
+                <input id="Email-@brand.Id" name="SupportEmailAddress" value="@brand.SupportEmailAddress" type="email" class="form-control" />
+            </div>
+            <div class="col-12">
+                <label for="Description-@brand.Id" class="form-label">Description</label>
+                <input id="Description-@brand.Id" name="Description" value="@brand.Description" class="form-control" maxlength="500" />
+            </div>
+        </div>
+        <div><button class="btn btn-outline-primary mt-3" type="submit">Save company details</button></div>
+    </form>
+}

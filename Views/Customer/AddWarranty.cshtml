@@ -11,8 +11,7 @@
         <div class="col-md-6"><label asp-for="ProductId" class="form-label"></label><select asp-for="ProductId" class="form-select">@foreach(var p in products){<option value="@p.Id">@p.Name</option>}</select><span asp-validation-for="ProductId" class="text-danger"></span></div>
         <div class="col-md-6"><label asp-for="StartDate" class="form-label"></label><input asp-for="StartDate" type="date" class="form-control" /><span asp-validation-for="StartDate" class="text-danger"></span></div>
         <div class="col-md-6"><label asp-for="DurationMonths" class="form-label"></label><input asp-for="DurationMonths" class="form-control" /><span asp-validation-for="DurationMonths" class="text-danger"></span></div>
-        <div class="col-md-6"><label asp-for="ExpiryDate" class="form-label"></label><input asp-for="ExpiryDate" type="date" class="form-control" /><span asp-validation-for="ExpiryDate" class="text-danger"></span></div>
-        <div class="col-md-12"><label asp-for="WarrantyType" class="form-label"></label><input asp-for="WarrantyType" class="form-control" /><span asp-validation-for="WarrantyType" class="text-danger"></span></div>
+        <div class="col-md-12"><label asp-for="WarrantyType" class="form-label"></label><input asp-for="WarrantyType" class="form-control" /><span asp-validation-for="WarrantyType" class="text-danger"></span><div class="form-text">The expiry date is calculated from the start date and duration.</div></div>
     </div>
     <button class="btn btn-primary mt-3" type="submit">Save Warranty</button>
 </form>

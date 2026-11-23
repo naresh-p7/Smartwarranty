@@ -47,6 +47,10 @@
               "target": "Package",
               "version": "[4.2.0, )"
             },
+            "Docnet.Core": {
+              "target": "Package",
+              "version": "[2.6.0, )"
+            },
             "Microsoft.EntityFrameworkCore.Design": {
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
@@ -62,6 +66,22 @@
               "suppressParent": "All",
               "target": "Package",
               "version": "[8.0.11, )"
+            },
+            "PdfPig": {
+              "target": "Package",
+              "version": "[0.1.16, )"
+            },
+            "System.Drawing.Common": {
+              "target": "Package",
+              "version": "[8.0.11, )"
+            },
+            "Tesseract": {
+              "target": "Package",
+              "version": "[5.2.0, )"
+            },
+            "Tesseract.Data.English": {
+              "target": "Package",
+              "version": "[4.0.0, )"
             }
           },
           "imports": [

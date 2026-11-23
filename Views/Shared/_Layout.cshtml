@@ -82,6 +82,21 @@
             {
                 <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
             }
+            @if (ViewData["ActiveNotifications"] is IEnumerable<SmartWarranty_2.Models.Notification> activeNotifications)
+            {
+                foreach (var notification in activeNotifications)
+                {
+                    <div class="alert alert-warning d-flex justify-content-between align-items-start gap-3" role="alert">
+                        <div><strong>@notification.Title</strong><div>@notification.Message</div></div>
+                        <form asp-controller="Customer" asp-action="DismissNotification" method="post">
+                            @Html.AntiForgeryToken()
+                            <input type="hidden" name="id" value="@notification.Id" />
+                            <input type="hidden" name="returnUrl" value="@($"{Context.Request.Path}{Context.Request.QueryString}")" />
+                            <button class="btn btn-sm btn-outline-dark" type="submit">Dismiss</button>
+                        </form>
+                    </div>
+                }
+            }
             @RenderBody()
         </div>
     </main>

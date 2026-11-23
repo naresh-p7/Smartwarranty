@@ -1,6 +1,6 @@
 {
   "Version": 1,
-  "Hash": "fY1CSmo7NoyeMd/WKtYkiRjlDIbTFyWXbfjXX6pZyZ8=",
+  "Hash": "8FCtAPYVbCVTtcPAX/pyTjJpma/4hmc+iiksDCgzirg=",
   "Source": "Smartwarranty_2",
   "BasePath": "_content/Smartwarranty_2",
   "Mode": "Default",
@@ -1193,6 +1193,44 @@
       "CopyToOutputDirectory": "Never",
       "CopyToPublishDirectory": "PreserveNewest",
       "OriginalItemSpec": "wwwroot\\lib\\jquery\\LICENSE.txt"
+    },
+    {
+      "Identity": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\uploads\\73992360-234d-4f45-8e80-8296888a42c4.pdf",
+      "SourceId": "Smartwarranty_2",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\",
+      "BasePath": "_content/Smartwarranty_2",
+      "RelativePath": "uploads/73992360-234d-4f45-8e80-8296888a42c4.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\73992360-234d-4f45-8e80-8296888a42c4.pdf"
+    },
+    {
+      "Identity": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\uploads\\769ff67f-ee59-4977-a1d6-b085ef4bf945.pdf",
+      "SourceId": "Smartwarranty_2",
+      "SourceType": "Discovered",
+      "ContentRoot": "C:\\Users\\nares\\Music\\Smartwarranty_2\\wwwroot\\",
+      "BasePath": "_content/Smartwarranty_2",
+      "RelativePath": "uploads/769ff67f-ee59-4977-a1d6-b085ef4bf945.pdf",
+      "AssetKind": "All",
+      "AssetMode": "All",
+      "AssetRole": "Primary",
+      "AssetMergeBehavior": "PreferTarget",
+      "AssetMergeSource": "",
+      "RelatedAsset": "",
+      "AssetTraitName": "",
+      "AssetTraitValue": "",
+      "CopyToOutputDirectory": "Never",
+      "CopyToPublishDirectory": "PreserveNewest",
+      "OriginalItemSpec": "wwwroot\\uploads\\769ff67f-ee59-4977-a1d6-b085ef4bf945.pdf"
     }
   ]
 }

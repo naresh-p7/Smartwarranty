@@ -25,16 +25,6 @@ public static class DbInitializer
             });
         }
 
-        if (!db.ProductCategories.Any())
-        {
-            db.ProductCategories.AddRange(
-                new ProductCategory { Name = "Electronics", Description = "Electronics products" },
-                new ProductCategory { Name = "Home Appliances", Description = "Home appliances" },
-                new ProductCategory { Name = "Computers", Description = "Computers and accessories" },
-                new ProductCategory { Name = "Mobile Devices", Description = "Phones and tablets" }
-            );
-        }
-
         db.SaveChanges();
     }
 }
